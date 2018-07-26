@@ -6,26 +6,29 @@
 // +----------------------------------------------------------------------
 // | Licensed ( http://www.apache.org/licenses/LICENSE-2.0 )
 // +----------------------------------------------------------------------
-// | Author: 流年 <liu21st@gmail.com>
+// | Author: 王玮 <wwkillleng@sina.com>
 // +----------------------------------------------------------------------
 
 // 应用公共文件
-//function merge_recursion ($array1,$array2)
-//{
-//    if (is_array($array1) && is_array($array2)) {
-//        foreach ($array2 as $index => $item) {
-//            if (is_array($item))
-//        }
-//    }
-//}
-
-function myExplode($delimiter, $string, $limit = false, $allowEmpty = true)
+/**
+ * php原生explode方法拓展
+ * 添加去除空值参数
+ * @param string        $delimiter  分割符
+ * @param string|array  $string     被分割的字符串
+ * @param bool          $limit      分割数量限制
+ * @param bool          $allowEmpty 是否允许空字符串出现
+ * @return array    分割后的数组
+ */
+function myExplode($delimiter,$string, $limit = false, $allowEmpty = true)
 {
-    if ($limit) {
+
+    if ($limit !== false)
+    {
         $exploded = explode($delimiter,$string,$limit);
     }
-    else {
-            $exploded = explode($delimiter,$string);
+    else
+    {
+        $exploded = explode($delimiter,$string);
     }
 
     if ($allowEmpty && !empty($exploded))
@@ -35,6 +38,12 @@ function myExplode($delimiter, $string, $limit = false, $allowEmpty = true)
     return $exploded;
 }
 
+/**
+ * 比较时间差
+ * @param int $start 起始unix时间戳
+ * @param int $end  结束unix时间戳
+ * @return bool|DateInterval 经历的时间
+ */
 function  diffTime($start, $end) {
     $d_start    = new DateTime(date('Y-m-d H:i:s',$start));
     $d_end      = new DateTime(date('Y-m-d H:i:s',$end));
@@ -42,7 +51,12 @@ function  diffTime($start, $end) {
     return $diff;
 }
 
-function array_sum_recursive($array) {
+/**
+ * 递归数组求和
+ * @param array $array 需求和的数组
+ * @return int 求和后的数值
+ */
+function array_sum_recursive(array $array) {
     $sum = 0;
     if (is_array($array)) {
         foreach ($array as $value) {

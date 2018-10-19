@@ -1314,10 +1314,12 @@ abstract class Model implements \JsonSerializable, \ArrayAccess
      * @access public
      * @param array   $dataSet 数据
      * @param boolean $replace 是否自动识别更新和写入
+     * @param boolean $autopk  是否自动写入主键
      * @return array|false
      * @throws \Exception
+     * @fix wangwei 20180928
      */
-    public function saveAll($dataSet, $replace = true)
+    public function saveAll($dataSet, $replace = true, $autopk = true)
     {
         if ($this->validate) {
             // 数据批量验证
@@ -1333,8 +1335,12 @@ abstract class Model implements \JsonSerializable, \ArrayAccess
         $db     = $this->getQuery();
         $db->startTrans();
         try {
-            $pk = $this->getPk();
-            if (is_string($pk) && $replace) {
+            if ($autopk)
+            {
+                $pk = $this->getPk();
+            }
+
+            if (!empty($pk) && is_string($pk) && $replace) {
                 $auto = true;
             }
             foreach ($dataSet as $key => $data) {

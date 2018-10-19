@@ -498,6 +498,21 @@ if (!function_exists('xml')) {
     }
 }
 
+if (!function_exists('octet')) {
+    /**
+     * 获取\think\response\Octet对象实例
+     * @param mixed   $data    返回的数据
+     * @param integer $code    状态码
+     * @param array   $header  头部
+     * @param array   $options 参数
+     * @return \think\response\Xml
+     */
+    function octet($data = [], $code = 200, $header = [], $options = [])
+    {
+        return Response::create($data, 'octet', $code, $header, $options);
+    }
+}
+
 if (!function_exists('redirect')) {
     /**
      * 获取\think\response\Redirect对象实例

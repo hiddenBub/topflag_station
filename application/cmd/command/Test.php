@@ -6,7 +6,7 @@
  * Time: 20:03
  */
 
-namespace app\home\command;
+namespace app\cmd\command;
 
 
 use app\model\Station;

@@ -3,16 +3,18 @@ namespace app\index\controller;
 
 use app\model\Chart;
 use think\Controller;
+use think\Response;
 use app\model\station\StationData;
 use app\model\Station;
 use think\request;
+use think\Cache;
 
 class Index extends Controller
 {
     public function index()
     {
         $station =  Station::field('station_id,station_name') ->where('status','1') -> select();
-        $charts =   Chart::field('chart_id,name') -> select();
+        $charts =   Chart::field('chart_id,name') -> where('status', 1) -> select();
 //        dump($station);die;
         $this -> assign('station', $station);
         $this -> assign('charts', $charts);
@@ -21,6 +23,145 @@ class Index extends Controller
 
 
 //        return '<style type="text/css">*{ padding: 0; margin: 0; } .think_default_text{ padding: 4px 48px;} a{color:#2E5CD5;cursor: pointer;text-decoration: none} a:hover{text-decoration:underline; } body{ background: #fff; font-family: "Century Gothic","Microsoft yahei"; color: #333;font-size:18px} h1{ font-size: 100px; font-weight: normal; margin-bottom: 12px; } p{ line-height: 1.6em; font-size: 42px }</style><div style="padding: 24px 48px;"> <h1>:)</h1><p> ThinkPHP V5<br/><span style="font-size:30px"><十年>   </十年>磨一剑 - 为API开发设计的高性能框架</span></p><span style="font-size:22px;">[ V5.0 版本由 <a href="http://www.qiniu.com" target="qiniu">七牛云</a> 独家赞助发布 ]</span></div><script type="text/javascript" src="https://tajs.qq.com/stats?sId=9347272" charset="UTF-8"></script><script type="text/javascript" src="https://e.topthink.com/Public/static/client.js"></script><think id="ad_bd568ce7058a1091"></think>';
+    }
+
+    public function inf ()
+    {
+        $station =  Station::field('station_id,station_name') ->where('status','1') -> select();
+        $this -> assign('station', $station);
+        return view('inf');
+    }
+
+    public function testDatFile()
+    {
+        // 数据基站ID
+        $station_id = Request::instance() -> post('station');
+        // 时间跨度
+        $timeRange = Request::instance() -> post('timeLine');
+        // 创建数据库模型
+        $model = new Station();
+        $station = $model -> field('storage_path,station_name') -> where('station_id', $station_id) -> find();
+        if (!empty($station['storage_path']) && file_exists($station['storage_path']))
+        {
+
+
+            $handle = fopen($station['storage_path'], 'rb');
+            $length = 0;
+            // 获取时间范围时间戳
+            $range = array_map('strtotime',(explode(' - ',$timeRange)));
+            while (feof($handle)===false) {
+                # code...
+                $line = fgets($handle);
+
+                // 遍历写入
+
+                $lineData = explode(',',$line);
+                $record = strtotime(trim($lineData[0],'"'));
+                if ($record > $range[0] && $record < $range[1]){
+                    $length++;
+                }
+            }
+
+            fclose($handle);        // 关闭文件
+
+            if ($length == 0) {     // 数据为空
+                $res = [
+                    'data'  => [],
+                    'status'    => 1,
+                    'msg'       => '没有数据或文件不存在',
+                ];
+            }
+            else                    // 有数据
+            {
+                $res = [
+                    'data'  => [],
+                    'status'    => 0,
+                    'msg'       => '数据正常',
+                ];
+            }
+        }
+        else
+        {
+            $res = [
+                'data'      => [],
+                'status'    => 1,
+                'msg'       => '没有数据或文件不存在'
+            ];
+        }
+        return json($res);
+    }
+
+    public function getDatFile()
+    {
+        // 数据基站ID
+        $station_id = Request::instance() -> post('station');
+        // 时间跨度
+        $timeRange = Request::instance() -> post('timeLine');
+        // 创建数据库模型
+        $model = new Station();
+        $station = $model -> field('storage_path,station_name') -> where('station_id', $station_id) -> find();
+        if (!empty($station['storage_path']) && file_exists($station['storage_path']))
+        {
+            // 文件位置
+            $tempPath = 'D:\Campbellsci\LoggerNet\temp\data.dat';
+            // 读取本地数据
+            $file = $this->readFile($station['storage_path']);
+            // 获取时间范围时间戳
+            $Range = array_map('strtotime',(explode(' - ',$timeRange)));
+            // 遍历写入
+            foreach ($file as $line) {
+
+                $lineData = explode(',',$line);
+                $record = strtotime(trim($lineData[0],'"'));
+                if ($record === false || ($record >= $Range[0] && $record <= $Range[1])){
+                    $this -> writeFile($line,$tempPath);
+                }
+
+            }
+
+            $handle = fopen ( $tempPath, "rb" );
+            $file_Size = filesize ( $tempPath );
+            $file_name = iconv("UTF-8","GB2312",$station['station_name'].$timeRange . '.dat');
+
+
+            $data = fread($handle,$file_Size);
+            fclose ( $handle );
+            unlink($tempPath);
+            return octet($data,200,['Accept-Length'=>$file_Size,'Content-Disposition'=>'attachment','filename'=>$file_name]);
+
+        }
+    }
+
+    public function writeFile($content,$path)
+    {
+        $file_name = $path;
+
+        $file_pointer = fopen($file_name, "a+");
+
+        $lock = flock($file_pointer, LOCK_EX);
+// 如果版本低于PHP4.0.2， 用 2 代替 LOCK_EX
+
+        if ($lock) {
+
+            fwrite($file_pointer, $content);
+            flock($file_pointer, LOCK_UN);
+// 如果版本低于PHP4.0.2， 用 3 代替 LOCK_UN
+
+        }
+
+        fclose($file_pointer);
+    }
+
+    public function readFile($path)
+    {
+        $handle = fopen($path, 'rb');
+
+        while (feof($handle)===false) {
+            # code...
+            yield fgets($handle);
+        }
+
+        fclose($handle);
     }
 
     public function getChart()
@@ -44,6 +185,17 @@ class Index extends Controller
     public function taskList()
     {
 
+        // 使用memcache作为缓存介质
+        $memcache = Cache::store('memcache');
+        $memcache -> set('foo', 1);
+        $foo = $memcache ->get ('foo');
+
+        dump($foo);
+//        $memcache=new Memcache();
+//        $memcache->set('foo','bar');
+//
+//
+//        dump($memcache->get('foo'));
 
         die;
         $series = range(1, 32768);
@@ -79,7 +231,7 @@ class Index extends Controller
         $res = [];
         foreach ($station AS $key => $value) {
             $res[$key]['name'] = $value['station_name'];
-            $res[$key]['latLng'] = [floatval($value['lat']),floatval($value['lng'])];
+            $res[$key]['lngLat'] = [floatval($value['lng']), floatval($value['lat'])];
         }
 
         return json($res);

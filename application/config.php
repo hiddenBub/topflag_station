@@ -177,7 +177,12 @@ return [
         // 日志保存目录
         'path'  => LOG_PATH,
         // 日志记录级别
-        'level' => [],
+        'level' => ['error', 'notice', 'log', 'info', 'debug', 'sql'],
+
+        'apart_level' => ['error', 'notice', 'log', 'info', 'debug', 'sql']
+        // 日志文件大小
+//        'file_size' => 30,
+
     ],
 
     // +----------------------------------------------------------------------
@@ -192,15 +197,34 @@ return [
     // | 缓存设置
     // +----------------------------------------------------------------------
 
-    'cache'                  => [
-        // 驱动方式
-        'type'   => 'File',
-        // 缓存保存目录
-        'path'   => CACHE_PATH,
-        // 缓存前缀
-        'prefix' => '',
-        // 缓存有效期 0表示永久缓存
-        'expire' => 0,
+    'cache' => [
+        // 使用复合缓存类型
+        'type'  =>  'complex',
+        // 默认使用的缓存
+        'default'   =>  [
+            // 驱动方式
+            'type'      => 'File',
+            // 缓存保存目录
+            'path'      => CACHE_PATH,
+        ],
+        // 文件缓存
+        'file'  =>  [
+            // 驱动方式
+            'type'  => 'file',
+            // 设置不同的缓存保存目录
+            'path'  => RUNTIME_PATH . 'file/',
+        ],
+        // redis缓存
+        'redis'   =>  [
+            // 驱动方式
+            'type'      => 'redis',
+            // 服务器地址
+            'host'      => '127.0.0.1',
+        ],
+        'memcache'  => [
+            'type'      => 'memcache',
+            'host'      => '127.0.0.1'
+        ]
     ],
 
     // +----------------------------------------------------------------------
@@ -245,4 +269,29 @@ return [
         'var_page'  => 'page',
         'list_rows' => 15,
     ],
+
+    'mongo_db'  => [
+        // 数据库类型
+        'type' => '\think\mongo\Connection',
+        // 服务器地址
+        'hostname' => 'localhost',
+        // 数据库名
+        'database' => 'topflag',
+        // 用户名
+        'username' => '',
+        // 密码
+        'password' => '',
+        // 端口
+        'hostport' => '27017',
+        // 连接dsn
+        'dsn' => '',
+        // 数据库连接参数
+        'params' => [],
+        // 数据库编码默认采用utf8
+        'charset' => 'utf8',
+        // 数据库表前缀
+        'prefix' => '',
+        // 主键强制转换为id
+        'pk_convert_id' => true,
+    ]
 ];

@@ -10,5 +10,7 @@
 // +----------------------------------------------------------------------
 
 return [
-    'app\home\command\Test',
+    'app\cmd\command\Test',
+    'app\cmd\command\PullData',
+    'app\cmd\command\SchedulePull',
 ];

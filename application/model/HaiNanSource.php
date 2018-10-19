@@ -9,23 +9,23 @@
 namespace app\model;
 use think\Model;
 
-class Source extends Model
+class HaiNanSource extends Model
 {
     // 设置数据源数据表名称
-    protected $table = 'obsdata';
+    protected $table = 'tf_station_data';
 
     // 设置连接参数
     protected $connection = [
         // 数据库类型
         'type'      => 'mysql',
         // 服务器IP
-        'hostname'  => '39.106.70.104',
+        'hostname'  => '59.49.248.237',
         // 数据库名称
-        'database'  => 'topflag',
+        'database'  => 'formatdata',
         // 登陆用户名称
         'username'  => 'root',
         // 登录用户密码
-        'password'  => '123456789',
+        'password'  => 'topflag12345',
         // 数据库字符集
         'charset'   => 'utf8',
         /*// 数据库类型

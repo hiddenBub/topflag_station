@@ -32,7 +32,7 @@ class Chart extends Model
         // $id == 1 查找太阳辐射记录
         if ($id == 1) {
             // 设置查找的字段
-            $fields = 'sum(GHIsum) AS GHIsum,sum(GTIsum) AS GTIsum,d.station_id,d.ctime';
+            $fields = 'sum(GHI) AS GHIsum,sum(GTI) AS GTIsum,d.station_id,d.ctime';
             // 初始化粒度信息，此处需要粒度信息
             if (empty($granularity_id)) {
                 $granularity_id = 1;
@@ -51,6 +51,7 @@ class Chart extends Model
             $temp = StationData::field($fields) -> alias('d')
                 -> join('tf_station_data_irradiance i', 'd.data_id = i.data_id')
                 -> where('station_id',$station_id)
+                -> where('FROM_UNIXTIME(d.ctime,"%Y-%m-%d %H") > FROM_UNIXTIME(d.ctime,"%Y-%m-%d 00")' )
                 -> group('station_id,FROM_UNIXTIME(d.ctime,\''.$format['0'].'\')')
                 -> select();
             $data['legend']['data']     = ['GHIsum','GTIsum'];
@@ -63,7 +64,7 @@ class Chart extends Model
                     'barGap'    => 0,
                 ];
                 foreach ($temp as $key => $value) {
-                    $data['series'][$index]['data'][] = $value[$item];
+                    $data['series'][$index]['data'][] = round($value[$item] * 60 / (1000 * 1000), 4);
                     $date = date($format['1'],$value['ctime']);
                     if (!in_array($date,$data['xAxis'][0]['data'])) $data['xAxis'][0]['data'][] = $date;
                 }
@@ -77,9 +78,9 @@ class Chart extends Model
             ];
             $data['dataZoom'] = [
                 [
-                    'show'  =>true,
-                    'start' =>94,
-                    'end'   =>100,
+                    'show'  => true,
+                    'start' => 94,
+                    'end'   => 100,
                 ],
                 [
                     'type'  => 'inside',
@@ -161,7 +162,7 @@ class Chart extends Model
                     'barGap'    => 0,
                 ];
                 foreach ($temp as $key => $value) {
-                    $data['series'][$index]['data'][] = $value[$item];
+                    $data['series'][$index]['data'][] = round($value[$item] * 60 / (1000 * 1000), 4);
                     $date = date($format['1'],$value['ctime']);
                     if (!in_array($date,$data['xAxis'][0]['data'])) $data['xAxis'][0]['data'][] = $date;
                 }
@@ -281,7 +282,7 @@ ORDER BY
         }
         else if ($id == 4) {
             // 设置查找的字段
-            $fields = 'GHIsum,GTIsum,station_id,d.ctime';
+            $fields = 'GHI as GHTsum,GTI as GTIsum,station_id,d.ctime';
             // 初始化粒度信息，此处需要粒度信息
             if (empty($granularity_id)) {
                 $granularity_id = 1;
@@ -300,10 +301,7 @@ ORDER BY
             $time = time() - 24 * 60 * 60;
             $time_max = time();
             $temp = StationData::query("SELECT
-	GHIsum,
-	GTIsum,
-	station_id,
-	ctime
+	$fields
 FROM
 	`tf_station_data` AS d
 INNER JOIN `tf_station_data_irradiance` AS i ON i.data_id = d.data_id
@@ -318,6 +316,7 @@ ORDER BY
             $data['legend']['data']     = ['GHIsum','GTIsum'];
 
             $data['xAxis'][0]['data'] = [];
+            $GHIsum = 0;$GTIsum = 0;
             foreach ($data['legend']['data'] as $index => $item) {
                 $data['series'][$index] = [
                     'name'      => $item,
@@ -325,7 +324,8 @@ ORDER BY
                     'barGap'    => 0,
                 ];
                 foreach ($temp as $key => $value) {
-                    $data['series'][$index]['data'][] = $value[$item];
+                    $$item += $value[$item] * 60 / (1000 * 1000);
+                    $data['series'][$index]['data'][] = $$item;
                     $date = date($format['1'],$value['ctime']);
                     if (!in_array($date,$data['xAxis'][0]['data'])) $data['xAxis'][0]['data'][] = $date;
                 }
@@ -372,7 +372,7 @@ ORDER BY
         }
         else if ($id == 5) {
             // 设置查找的字段
-            $fields = 'temperature,humidity,station_id,ctime';
+            $fields = 'air_temperature as temperature,relative_humidity as humidity,station_id,ctime';
             // 初始化粒度信息，此处需要粒度信息
             if (empty($granularity_id)) {
                 $granularity_id = 1;
@@ -454,7 +454,7 @@ ORDER BY
                     'axisLabel' => [
                         'formatter' => '{value} °C',
                     ],
-                    'min'   => 0,
+                    'min'   => -50,
                     'max'   => 50,
                     'interval'  => 5,
                 ],

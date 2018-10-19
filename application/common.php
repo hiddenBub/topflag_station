@@ -13,8 +13,8 @@
 /**
  * php原生explode方法拓展
  * 添加去除空值参数
- * @param string        $delimiter  分割符
- * @param string|array  $string     被分割的字符串
+ * @param string|array  $delimiter  分割符
+ * @param string        $string     被分割的字符串
  * @param bool          $limit      分割数量限制
  * @param bool          $allowEmpty 是否允许空字符串出现
  * @return array    分割后的数组
@@ -31,7 +31,7 @@ function myExplode($delimiter,$string, $limit = false, $allowEmpty = true)
         $exploded = explode($delimiter,$string);
     }
 
-    if ($allowEmpty && !empty($exploded))
+    if (!$allowEmpty && !empty($exploded))
     {
         $exploded = array_values(array_filter($exploded));
     }

@@ -365,15 +365,11 @@ class schedulePull extends Command
 
             }
 
-            $starttime = 0;
-            if (($ctime = StationData::max('ctime')) > 0)
-            {
-                $starttime = $ctime;
-            }
+            $start = 0;
             try{
 
                 // 从mongoDB中获取数据
-                while($raw = $mongoDb -> table('data') -> where('TIMESTAMP','>=', $starttime) -> order('TIMESTAMP','asc') -> limit($offset) -> select())
+                while($raw = $mongoDb -> table('data') -> where('TIMESTAMP','>=', $start) -> order('TIMESTAMP','asc') -> limit($offset) -> select())
                 {
                     // dump($raw);die;
 
@@ -510,7 +506,7 @@ class schedulePull extends Command
                     $timeout = time();
                     $timeDiff = $this -> diffTime($timein,$timeout);
                     $output->writeln(iconv('utf-8','GBK','插入耗时：'.$timeDiff->format('%h小时').$timeDiff->format('%i分钟').$timeDiff->format('%s秒')));
-                    $starttime = $raw[count($raw) - 1]['TIMESTAMP'];
+                    $start = $raw[count($raw) - 1]['TIMESTAMP'];
                     echo "\n";
                 }
             }

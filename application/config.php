@@ -137,17 +137,17 @@ return [
         // 标签库标签结束标记
         'taglib_end'   => '}',
         // 是否使用布局模板
-        'layout_on'     =>  true,
+        'layout_on'     =>  false,
         // 布局模板名称
-        'layout_name'   =>  'layout',
-
+//        'layout_name'   =>  'layout',
+        'layout_name'   => '',
     ],
 
     // 视图输出字符串内容替换
     'view_replace_str'       => [
         '__STATIC__'    => '/static',
-        '__SITE_PUB__'  => '/static/site',         // 基站静态文件目录
-        '__PLUGINS__'   => '/static/plugins'              // 公共插件存储目录
+        '__SITE_PUB__'  => '/static/site',              // 基站静态文件目录
+        '__PLUGINS__'   => '/static/plugins'            // 公共插件存储目录
         ],
     // 默认跳转页面对应的模板文件
     'dispatch_success_tmpl'  => THINK_PATH . 'tpl' . DS . 'dispatch_jump.tpl',

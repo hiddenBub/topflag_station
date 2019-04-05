@@ -367,6 +367,26 @@ class schedulePull extends Command
 
             $start = 0;
             try{
+                foreach ($station as $index => $stationItem)
+                {
+                    $stationData = $mongoDb -> table('data') -> where('station_id','=',$stationItem['station_id']) -> limit(0,1) -> find();
+                    // 当前有数据则更改数据
+                    if (!empty($stationData))
+                    {
+                        $stationData = array_keys($stationData);
+                        $keys = [];
+                        foreach ($stationData as $r)
+                        {
+                            if (array_key_exists($r,$varNames)){
+                                $keys[] = $r;
+                            }
+                        }
+                        $fieldsData['fields'] = implode(',',$keys);
+                        Station::where('station_id','=',$stationItem['station_id']) -> update($fieldsData);
+                    }
+
+                }
+
 
                 // 从mongoDB中获取数据
                 while($raw = $mongoDb -> table('data') -> where('TIMESTAMP','>=', $start) -> order('TIMESTAMP','asc') -> limit($offset) -> select())

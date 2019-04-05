@@ -19,22 +19,43 @@
  * @param bool          $allowEmpty 是否允许空字符串出现
  * @return array    分割后的数组
  */
-function myExplode($delimiter,$string, $limit = false, $allowEmpty = true)
+function myExplode($delimiter,$string, $limit = 0, $allowEmpty = true)
 {
+    try{
+        // 初始化方法所需变量
+        $exploded = [];
+        $myDelimiter = '︴';
+        if (!is_string($delimiter) && !is_array($delimiter)) throw new InvalidArgumentException('Invalid variable: delimiter');
+        if (!is_string($string)) throw new InvalidArgumentException('Invalid variable: string');
+        if (!is_int($limit)) throw new InvalidArgumentException('Invalid variable: limit');
+        if (!is_bool($allowEmpty)) throw new InvalidArgumentException('Invalid variable: allowEmpty');
 
-    if ($limit !== false)
-    {
-        $exploded = explode($delimiter,$string,$limit);
+        // 替换所有分隔符
+        if (is_array($delimiter) && count($delimiter) > 0)
+        {
+            foreach ($delimiter as $key => $item)
+            {
+                $string = str_replace($item,$myDelimiter,$string);
+            }
+        }
+        else{
+            $string = str_replace($delimiter,$myDelimiter,$string);
+        }
+
+        $exploded = explode($myDelimiter,$string);
+
+        // 剔除空项
+        if (!$allowEmpty && !empty($exploded)) $exploded = array_values(array_filter($exploded));
+
+        // 限制数据容量
+        if (count($exploded) > 0 && $limit > 0) $exploded = array_slice($exploded,0, $limit);
     }
-    else
+    catch (Exception $e)
     {
-        $exploded = explode($delimiter,$string);
+        echo $e -> getMessage();
     }
 
-    if (!$allowEmpty && !empty($exploded))
-    {
-        $exploded = array_values(array_filter($exploded));
-    }
+
     return $exploded;
 }
 

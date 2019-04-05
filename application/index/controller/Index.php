@@ -185,18 +185,8 @@ class Index extends Controller
     public function taskList()
     {
 
-        // 使用memcache作为缓存介质
-        $memcache = Cache::store('memcache');
-        $memcache -> set('foo', 1);
-        $foo = $memcache ->get ('foo');
-
-        dump($foo);
-//        $memcache=new Memcache();
-//        $memcache->set('foo','bar');
-//
-//
-//        dump($memcache->get('foo'));
-
+        dump(strtoupper(sha1(strtoupper(sha1('topflag').'1541485928'))));
+        echo time();
         die;
         $series = range(1, 32768);
         $prime = [];
@@ -235,6 +225,11 @@ class Index extends Controller
         }
 
         return json($res);
+    }
+
+    public function echarts()
+    {
+        return view('echarts');
     }
 
     public function phpinfo()
